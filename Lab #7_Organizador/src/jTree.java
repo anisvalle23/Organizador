@@ -1,3 +1,4 @@
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.tree.*;
@@ -6,17 +7,18 @@ import java.io.File;
 import javax.swing.border.LineBorder;
 
 public class jTree extends JFrame {
-    private JTree arbolDirectorio;
-    private Logic logicaExplorador;
-    private DefaultMutableTreeNode raiz;
+
+    private JTree arbolDirectorios;
+    private Logic logicaArchivos;
+    private DefaultMutableTreeNode nodoRaiz;
     private DefaultTreeModel modeloArbol;
 
-    public jTree(Logic logicaExplorador) {
-        this.logicaExplorador = logicaExplorador;
-        initComponents();
+    public jTree(Logic logicaArchivos) {
+        this.logicaArchivos = logicaArchivos;
+        inicializarComponentes();
     }
 
-    private void initComponents() {
+    private void inicializarComponentes() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Explorador de Archivos");
         setSize(1000, 700);
@@ -25,36 +27,49 @@ public class jTree extends JFrame {
         JPanel panelPrincipal = new JPanel(new BorderLayout());
         panelPrincipal.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        raiz = new DefaultMutableTreeNode("Root");
-        arbolDirectorio = new JTree(raiz);
-        arbolDirectorio.setFont(new Font("Arial", Font.PLAIN, 16));
-        modeloArbol = (DefaultTreeModel) arbolDirectorio.getModel();
-        arbolDirectorio.addTreeSelectionListener(e -> seleccionarDirectorio());
+        JToolBar barraHerramientas = new JToolBar();
+        barraHerramientas.setFloatable(false);
 
-        JScrollPane scrollPaneArbol = new JScrollPane(arbolDirectorio);
+        String[] opcionesOrdenar = {"Ordenar por...", "Nombre", "Fecha", "Tipo", "Tamaño"};
+        JComboBox<String> listaOrdenar = new JComboBox<>(opcionesOrdenar);
+        listaOrdenar.addActionListener(e -> ejecutarAccionOrdenar((String) listaOrdenar.getSelectedItem()));
+
+        String[] opcionesGestion = {"Gestión de archivos...", "Crear Carpeta", "Cambiar Nombre", "Copiar", "Pegar"};
+        JComboBox<String> listaGestion = new JComboBox<>(opcionesGestion);
+        listaGestion.addActionListener(e -> ejecutarAccionGestion((String) listaGestion.getSelectedItem()));
+
+        String[] opcionesCrear = {"Crear...", "Crear archivo de texto", "Crear archivo comercial"};
+        JComboBox<String> listaCrear = new JComboBox<>(opcionesCrear);
+        listaCrear.addActionListener(e -> ejecutarAccionCrear((String) listaCrear.getSelectedItem()));
+
+        String[] opcionesRegistrar = {"Registrar en archivo...", "Escribir en archivo"};
+        JComboBox<String> listaRegistrar = new JComboBox<>(opcionesRegistrar);
+        listaRegistrar.addActionListener(e -> ejecutarAccionRegistrar((String) listaRegistrar.getSelectedItem()));
+
+        JButton botonSalir = new JButton("Salir");
+        botonSalir.addActionListener(e -> System.exit(0));
+
+        barraHerramientas.add(listaOrdenar);
+        barraHerramientas.addSeparator();
+        barraHerramientas.add(listaGestion);
+        barraHerramientas.addSeparator();
+        barraHerramientas.add(listaCrear);
+        barraHerramientas.addSeparator();
+        barraHerramientas.add(listaRegistrar);
+        barraHerramientas.add(Box.createHorizontalGlue());
+        barraHerramientas.add(botonSalir);
+
+        nodoRaiz = new DefaultMutableTreeNode("Root");
+        arbolDirectorios = new JTree(nodoRaiz);
+        arbolDirectorios.setFont(new Font("Arial", Font.PLAIN, 16));
+        modeloArbol = (DefaultTreeModel) arbolDirectorios.getModel();
+        arbolDirectorios.addTreeSelectionListener(e -> seleccionarDirectorio());
+
+        JScrollPane scrollPaneArbol = new JScrollPane(arbolDirectorios);
         scrollPaneArbol.setBorder(BorderFactory.createLineBorder(new Color(52, 152, 219), 2));
         scrollPaneArbol.setPreferredSize(new Dimension(700, 600));
 
-        JPanel panelBotones = new JPanel();
-        panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.Y_AXIS));
-        panelBotones.setBorder(new EmptyBorder(10, 10, 10, 10));
-
-        String[] opciones = {
-            "Crear Carpeta", "Cambiar Nombre", "Crear archivo de texto", "Crear archivo comercial", 
-            "Escribir en archivo", "Ordenar por fecha", "Ordenar por nombre", "Ordenar por tamaño", 
-            "Ordenar por tipo", "Copiar", "Pegar", "Salir"
-        };
-
-        Dimension botonDimension = new Dimension(200, 50);
-
-        for (String opcion : opciones) {
-            JButton button = crearBotonColorido(opcion, botonDimension);
-            button.addActionListener(e -> ejecutarAccion(opcion));
-            panelBotones.add(button);
-            panelBotones.add(Box.createRigidArea(new Dimension(0, 10)));
-        }
-
-        panelPrincipal.add(panelBotones, BorderLayout.WEST);
+        panelPrincipal.add(barraHerramientas, BorderLayout.NORTH);
         panelPrincipal.add(scrollPaneArbol, BorderLayout.CENTER);
 
         add(panelPrincipal);
@@ -62,106 +77,94 @@ public class jTree extends JFrame {
         actualizarArbol();
     }
 
-    private JButton crearBotonColorido(String texto, Dimension dim) {
-        JButton boton = new JButton(texto);
-        boton.setPreferredSize(dim);
-        boton.setMaximumSize(dim);
-        boton.setFont(new Font("Arial", Font.BOLD, 14));
-        boton.setBackground(new Color(41, 128, 185));
-        boton.setForeground(Color.WHITE);
-        boton.setFocusPainted(false);
-        boton.setBorder(new LineBorder(new Color(52, 152, 219), 2));
-        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-        boton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                boton.setBackground(new Color(52, 152, 219));
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                boton.setBackground(new Color(41, 128, 185));
-            }
-        });
-
-        return boton;
-    }
-
-    private void ejecutarAccion(String opcion) {
+    private void ejecutarAccionOrdenar(String opcion) {
         File[] archivosOrdenados = null;
         switch (opcion) {
-            case "Crear Carpeta":
-                logicaExplorador.crearCarpeta();
+            case "Nombre":
+                archivosOrdenados = logicaArchivos.ordenarArchivosPorNombre();
                 break;
-            case "Cambiar Nombre":
-                logicaExplorador.renombrarArchivo();
+            case "Fecha":
+                archivosOrdenados = logicaArchivos.ordenarArchivosPorFecha();
                 break;
-            case "Crear archivo de texto":
-                logicaExplorador.crearArchivoTexto();
+            case "Tipo":
+                archivosOrdenados = logicaArchivos.organizarArchivosPorTipo();
                 break;
-            case "Crear archivo comercial":
-                logicaExplorador.crearArchivoComercial();
-                break;
-            case "Escribir en archivo":
-                logicaExplorador.escribirEnArchivo();
-                break;
-            case "Ordenar por fecha":
-                archivosOrdenados = logicaExplorador.ordenarArchivosPorFecha();
-                break;
-            case "Ordenar por nombre":
-                archivosOrdenados = logicaExplorador.ordenarArchivosPorNombre();
-                break;
-            case "Ordenar por tamaño":
-                archivosOrdenados = logicaExplorador.ordenarArchivosPorTamano();
-                break;
-            case "Ordenar por tipo":
-                archivosOrdenados = logicaExplorador.organizarArchivosPorTipo();
-                break;
-            case "Copiar":
-                logicaExplorador.copiarArchivo();
-                break;
-            case "Pegar":
-                logicaExplorador.pegarArchivo();
-                break;
-            case "Salir":
-                System.exit(0);
+            case "Tamaño":
+                archivosOrdenados = logicaArchivos.ordenarArchivosPorTamano();
                 break;
         }
 
         if (archivosOrdenados != null) {
-            logicaExplorador.mostrarArchivosOrdenados(archivosOrdenados, "Archivos ordenados");
+            logicaArchivos.mostrarArchivosOrdenados(archivosOrdenados, "Archivos ordenados");
             actualizarArbolOrdenado(archivosOrdenados);
         } else {
             actualizarArbol();
         }
     }
 
+    private void ejecutarAccionGestion(String opcion) {
+        switch (opcion) {
+            case "Crear Carpeta":
+                logicaArchivos.crearCarpeta();
+                break;
+            case "Cambiar Nombre":
+                logicaArchivos.renombrarArchivo();
+                break;
+            case "Copiar":
+                logicaArchivos.copiarArchivo();
+                break;
+            case "Pegar":
+                logicaArchivos.pegarArchivo();
+                break;
+        }
+        actualizarArbol();
+    }
+
+    private void ejecutarAccionCrear(String opcion) {
+        switch (opcion) {
+            case "Crear archivo de texto":
+                logicaArchivos.crearArchivoTexto();
+                break;
+            case "Crear archivo comercial":
+                logicaArchivos.crearArchivoComercial();
+                break;
+        }
+        actualizarArbol();
+    }
+
+    private void ejecutarAccionRegistrar(String opcion) {
+        if ("Escribir en archivo".equals(opcion)) {
+            logicaArchivos.escribirEnArchivo();
+        }
+    }
+
     private void seleccionarDirectorio() {
-        TreePath rutaSeleccionada = arbolDirectorio.getSelectionPath();
+        TreePath rutaSeleccionada = arbolDirectorios.getSelectionPath();
         if (rutaSeleccionada != null) {
-            String ruta = "";
+            StringBuilder ruta = new StringBuilder();
             for (Object nodo : rutaSeleccionada.getPath()) {
-                ruta += nodo.toString() + File.separator;
+                ruta.append(nodo.toString()).append(File.separator);
             }
-            logicaExplorador.setSeleccionado(new File(ruta));
+            logicaArchivos.setSeleccionado(new File(ruta.toString()));
         }
     }
 
     private void actualizarArbol() {
-        raiz.removeAllChildren();
-        cargarDirectorios(new File("Root"), raiz);
+        nodoRaiz.removeAllChildren();
+        cargarDirectorios(new File("Root"), nodoRaiz);
         modeloArbol.reload();
     }
 
     private void actualizarArbolOrdenado(File[] archivosOrdenados) {
-        raiz.removeAllChildren();
-        DefaultMutableTreeNode nodoPadre = new DefaultMutableTreeNode(logicaExplorador.getSeleccionado().getName());
+        nodoRaiz.removeAllChildren();
+        DefaultMutableTreeNode nodoPadre = new DefaultMutableTreeNode(logicaArchivos.getSeleccionado().getName());
 
         for (File archivo : archivosOrdenados) {
             DefaultMutableTreeNode nuevoNodo = new DefaultMutableTreeNode(archivo.getName());
             nodoPadre.add(nuevoNodo);
         }
 
-        raiz.add(nodoPadre);
+        nodoRaiz.add(nodoPadre);
         modeloArbol.reload();
     }
 

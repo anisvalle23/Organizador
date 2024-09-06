@@ -34,23 +34,23 @@ public class Logic {
     }
 
     public void crearCarpeta() {
-        String nombreCarpeta = mostrarDialogoInput("Ingrese el nombre de la carpeta:");
+        String nombreCarpeta = CustomDialogs.mostrarInputDialog("Ingrese el nombre de la carpeta:");
         if (nombreCarpeta != null && !nombreCarpeta.isBlank()) {
             try {
                 File nuevaCarpeta = new File(seleccionado, nombreCarpeta);
                 if (nuevaCarpeta.mkdir()) {
-                    mostrarMensaje("Carpeta creada exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    CustomDialogs.mostrarMensajeExito("Carpeta creada exitosamente");
                 } else {
-                    mostrarMensaje("No se pudo crear la carpeta", "Error", JOptionPane.ERROR_MESSAGE);
+                    CustomDialogs.mostrarMensajeError("No se pudo crear la carpeta");
                 }
             } catch (Exception e) {
-                mostrarMensaje("Error al crear la carpeta: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                CustomDialogs.mostrarMensajeError("Error al crear la carpeta: " + e.getMessage());
             }
         }
     }
 
     public void renombrarArchivo() {
-        String nuevoNombre = mostrarDialogoInput("Ingrese el nuevo nombre:");
+        String nuevoNombre = CustomDialogs.mostrarInputDialog("Ingrese el nuevo nombre:");
         if (nuevoNombre != null && !nuevoNombre.isBlank()) {
             try {
                 if (seleccionado.getName().endsWith(".txt") && !nuevoNombre.endsWith(".txt")) {
@@ -58,56 +58,56 @@ public class Logic {
                 }
                 File nuevoArchivo = new File(seleccionado.getParent(), nuevoNombre);
                 if (seleccionado.renameTo(nuevoArchivo)) {
-                    mostrarMensaje("Archivo renombrado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    CustomDialogs.mostrarMensajeExito("Archivo renombrado correctamente");
                 } else {
-                    mostrarMensaje("No se pudo renombrar el archivo", "Error", JOptionPane.ERROR_MESSAGE);
+                    CustomDialogs.mostrarMensajeError("No se pudo renombrar el archivo");
                 }
             } catch (Exception e) {
-                mostrarMensaje("Error al renombrar el archivo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                CustomDialogs.mostrarMensajeError("Error al renombrar el archivo: " + e.getMessage());
             }
         }
     }
 
     public void crearArchivoTexto() {
-        String nombreArchivo = mostrarDialogoInput("Ingrese el nombre del archivo de texto:");
+        String nombreArchivo = CustomDialogs.mostrarInputDialog("Ingrese el nombre del archivo de texto:");
         if (nombreArchivo != null && !nombreArchivo.isBlank()) {
             try {
                 new File(seleccionado, nombreArchivo + ".txt").createNewFile();
-                mostrarMensaje("Archivo de texto creado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                CustomDialogs.mostrarMensajeExito("Archivo de texto creado exitosamente");
             } catch (IOException e) {
-                mostrarMensaje("Error al crear el archivo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                CustomDialogs.mostrarMensajeError("Error al crear el archivo: " + e.getMessage());
             }
         }
     }
 
     public void crearArchivoComercial() {
-        String nombreArchivo = mostrarDialogoInput("Ingrese el nombre del archivo comercial:");
+        String nombreArchivo = CustomDialogs.mostrarInputDialog("Ingrese el nombre del archivo comercial:");
         if (nombreArchivo != null && !nombreArchivo.isBlank()) {
             try {
                 new File(seleccionado, nombreArchivo + ".bin").createNewFile();
-                mostrarMensaje("Archivo comercial creado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                CustomDialogs.mostrarMensajeExito("Archivo comercial creado exitosamente");
             } catch (IOException e) {
-                mostrarMensaje("Error al crear el archivo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                CustomDialogs.mostrarMensajeError("Error al crear el archivo: " + e.getMessage());
             }
         }
     }
 
     public void escribirEnArchivo() {
         if (esArchivoSeleccionado()) {
-            String texto = mostrarDialogoInput("Ingrese el texto a escribir en el archivo:");
+            String texto = CustomDialogs.mostrarInputDialog("Ingrese el texto a escribir en el archivo:");
             if (texto != null && !texto.isBlank()) {
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(seleccionado, true))) {
                     writer.write(texto);
                     writer.newLine();
-                    mostrarMensaje("Texto escrito correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    CustomDialogs.mostrarMensajeExito("Texto escrito correctamente.");
                 } catch (IOException e) {
-                    mostrarMensaje("Error al escribir en el archivo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    CustomDialogs.mostrarMensajeError("Error al escribir en el archivo: " + e.getMessage());
                 }
             } else {
-                mostrarMensaje("No se ingresó ningún texto.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                CustomDialogs.mostrarMensaje("No se ingresó ningún texto.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             }
         } else {
-            mostrarMensaje("Debe seleccionar un archivo válido para escribir.", "Error", JOptionPane.ERROR_MESSAGE);
+            CustomDialogs.mostrarMensajeError("Debe seleccionar un archivo válido para escribir.");
         }
     }
 
@@ -160,13 +160,13 @@ public class Logic {
                     File nuevoArchivo = new File(carpetaTipo, archivo.getName());
                     archivo.renameTo(nuevoArchivo);
                 }
-                mostrarMensaje("Archivos organizados por tipo", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                CustomDialogs.mostrarMensajeExito("Archivos organizados por tipo");
                 return seleccionado.listFiles();
             } else {
-                mostrarMensaje("No hay archivos para organizar por tipo.", "Error", JOptionPane.ERROR_MESSAGE);
+                CustomDialogs.mostrarMensajeError("No hay archivos para organizar por tipo.");
             }
         } else {
-            mostrarMensaje("Debe seleccionar una carpeta válida.", "Error", JOptionPane.ERROR_MESSAGE);
+            CustomDialogs.mostrarMensajeError("Debe seleccionar una carpeta válida.");
         }
         return null;
     }
@@ -177,7 +177,7 @@ public class Logic {
             for (File archivo : archivos) {
                 sb.append(archivo.getName()).append("\n");
             }
-            mostrarMensaje(sb.toString(), "Archivos ordenados", JOptionPane.INFORMATION_MESSAGE);
+            CustomDialogs.mostrarMensaje(sb.toString(), "Archivos ordenados", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -185,15 +185,15 @@ public class Logic {
         try {
             copia = new File(seleccionado.getAbsolutePath());
             puedePegar = true;
-            mostrarMensaje("Archivo copiado", "Información", JOptionPane.INFORMATION_MESSAGE);
+            CustomDialogs.mostrarMensaje("Archivo copiado", "Información", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
-            mostrarMensaje("Error al copiar archivo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            CustomDialogs.mostrarMensajeError("Error al copiar archivo: " + e.getMessage());
         }
     }
 
     public void pegarArchivo() {
         if (!puedePegar) {
-            mostrarMensaje("No hay archivo para pegar", "Error", JOptionPane.ERROR_MESSAGE);
+            CustomDialogs.mostrarMensajeError("No hay archivo para pegar");
             return;
         }
         try {
@@ -204,11 +204,11 @@ public class Logic {
                 } else {
                     copiarArchivoSimple(copia, nuevoArchivo);
                 }
-                mostrarMensaje("Archivo pegado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                CustomDialogs.mostrarMensajeExito("Archivo pegado correctamente");
                 puedePegar = false;
             }
         } catch (Exception e) {
-            mostrarMensaje("Error al pegar archivo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            CustomDialogs.mostrarMensajeError("Error al pegar archivo: " + e.getMessage());
         }
     }
 
@@ -253,24 +253,6 @@ public class Logic {
                 }
             }
         }
-    }
-
-    private void mostrarMensaje(String mensaje, String titulo, int tipoMensaje) {
-        UIManager.put("OptionPane.background", new Color(43, 43, 43));
-        UIManager.put("Panel.background", new Color(43, 43, 43));
-        UIManager.put("OptionPane.messageForeground", Color.WHITE);
-        UIManager.put("Button.background", new Color(52, 152, 219));
-        UIManager.put("Button.foreground", Color.WHITE);
-        JOptionPane.showMessageDialog(null, mensaje, titulo, tipoMensaje);
-    }
-
-    private String mostrarDialogoInput(String mensaje) {
-        UIManager.put("OptionPane.background", new Color(43, 43, 43));
-        UIManager.put("Panel.background", new Color(43, 43, 43));
-        UIManager.put("OptionPane.messageForeground", Color.WHITE);
-        UIManager.put("Button.background", new Color(52, 152, 219));
-        UIManager.put("Button.foreground", Color.WHITE);
-        return JOptionPane.showInputDialog(null, mensaje);
     }
 
     private File[] combinarCarpetasYArchivos(File[] carpetas, File[] archivos) {
